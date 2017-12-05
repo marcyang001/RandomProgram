@@ -11,14 +11,14 @@ Script to automatically shutdown an application after a certain time
 Two important variables:
 	1. processName: the name of the application which the user wants to turn off
 	2. totalSecond: the time after which the application will shutdown
-
+	3. password: password of the super-user (for making the PC sleep)
 """
 
 
 
 processName = "FaceTime"
 totalSecond = 60
-
+password = None
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--process", help="proces name which you want to shutdown",

@@ -1,4 +1,6 @@
 import subprocess, time
+import argparse
+
 
 ##########################################
 """
@@ -12,8 +14,27 @@ Two important variables:
 
 
 
-processName = "Chrome"
+processName = "FaceTime"
 totalSecond = 60
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--process", help="proces name which you want to shutdown",
+                    action="store")
+parser.add_argument("-s", "--second", help="the time in seconds after which the application will shutdown",
+                    action="store")
+parser.add_argument("-u", "--password", help="[optional] super-user password for making the computer sleep",
+                    action="store")
+args = parser.parse_args()
+
+password = args.password
+
+if args.process != None:
+	processName = args.process
+
+if args.second != None:
+	totalSecond = int(args.second)
+
 
 
 ##########################################
@@ -24,7 +45,7 @@ def get_pid(name):
 	output = subprocess.check_output(('grep', name), stdin=ps.stdout)
 	ps.wait()
 
-	pid = -1
+	pid = 999999
 	try:
 		pid = int(output.split("\n")[0].split()[0])
 	except ValueError:
@@ -33,11 +54,24 @@ def get_pid(name):
 	return pid
 
 #processName by Default is FaceTime
-def killFaceTime(processName):
+def killProcess(processName):
 
 	pid = str(get_pid(processName))
-	output = subprocess.check_output(('kill', '-9', pid))
+	
+	try:
+		output = subprocess.check_output(('kill', '-9', pid))
+	except Exception:
+		output = "no process"
+
 	return output
+
+def letPCSleep(password):
+
+	if password != None:
+		ps = subprocess.Popen(("echo", password), stdout=subprocess.PIPE)
+		output = subprocess.check_output(['sudo', 'shutdown', '-s', '+1'], stdin=ps.stdout)
+		ps.wait()
+
 
 
 
@@ -49,8 +83,8 @@ while totalSecond != 0:
 	# Increment the minute total
 	totalSecond -= 1
 
-killFaceTime(processName)
-
+killProcess(processName)
+letPCSleep(password)
 
 
 

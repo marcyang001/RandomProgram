@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+
 import subprocess, time
 import argparse
 
@@ -30,6 +32,7 @@ args = parser.parse_args()
 password = args.password
 
 if args.process != None:
+	print("enter here")
 	processName = args.process
 
 if args.second != None:
@@ -47,9 +50,9 @@ def get_pid(name):
 
 	pid = 999999
 	try:
-		pid = int(output.split("\n")[0].split()[0])
+		pid = int(str(output.decode("utf-8")).split("\n")[0].split()[0])
 	except ValueError:
-		print "Oops!  That was no valid number.  Try again..."
+		print ("Oops!  That was no valid number.  Try again...")
 
 	return pid
 
@@ -77,7 +80,7 @@ def letPCSleep(password):
 
 # Loop until totalSecond is 0
 while totalSecond != 0:
-	print ">>>>>>>>>>>>>>>>>>>>>", totalSecond, " second(s)"
+	print (">>>>>>>>>>>>>>>>>>>>>", totalSecond, " second(s)")
 	# Sleep for a second
 	time.sleep(1)
 	# Increment the minute total

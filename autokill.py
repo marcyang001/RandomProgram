@@ -71,7 +71,7 @@ def killProcess(processName):
 def letPCSleep(password):
 
 	if password != None:
-		ps = subprocess.Popen(("echo", password), stdout=subprocess.PIPE)
+		ps = subprocess.Popen(("echo", str(password.decode("utf-8"))), stdout=subprocess.PIPE)
 		output = subprocess.check_output(['sudo', 'shutdown', '-s', '+1'], stdin=ps.stdout)
 		ps.wait()
 

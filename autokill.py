@@ -32,7 +32,6 @@ args = parser.parse_args()
 password = args.password
 
 if args.process != None:
-	print("enter here")
 	processName = args.process
 
 if args.second != None:
@@ -51,7 +50,7 @@ def get_pid(name):
 	pid = 999999
 	try:
 		pid = int(str(output.decode("utf-8")).split("\n")[0].split()[0])
-	except ValueError:
+	except (ValueError, RunTimeError):
 		print ("Oops!  That was no valid number.  Try again...")
 
 	return pid
@@ -69,7 +68,6 @@ def killProcess(processName):
 	return output
 
 def letPCSleep(password):
-
 	if password != None:
 		ps = subprocess.Popen(("echo", str(password)), stdout=subprocess.PIPE)
 		output = subprocess.check_output(['sudo', '-S', 'shutdown', '-s', '+1'], stdin=ps.stdout)

@@ -22,4 +22,8 @@ def generateAttendance():
 	with open('attend.json', 'w') as outfile:
 		json.dump(attendanceAuthorization, outfile, sort_keys=True, indent=4)
 
-	print("Info: generated originalFraction.json and attend.json\n")
+	# output a new attendance sheet
+	with open('voteresult.json', 'w') as outfile:
+		json.dump({}, outfile, sort_keys=True, indent=4)
+
+	print("Info: generated originalFraction.json, attend.json and voteresult.json\n")

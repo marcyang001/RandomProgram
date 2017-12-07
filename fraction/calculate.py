@@ -183,15 +183,16 @@ def totalAttendanceRate(fractionChart):
     for ownerUnit, unitFraction in fractionChart.items():
         totalFraction += unitFraction
 
-    if totalFraction < 50:
-        print ("CAUTON: total fraction less than 50%, not enough to vote!")
     print("Info: total fraction vote: ", totalFraction)
+    if totalFraction < 50:
+        print ("\nCAUTON: total fraction less than 50%, not enough to vote!")
+
     return totalFraction
 
 def outputFractionOFEachVoter(fractionChart):
 
     totalFraction = 0
-    print("\nVoting Right for each voter ")
+    print("\nVoting Right for each valid voter ")
     print("=============================")
     for ownerUnit, unitFraction in fractionChart.items():
         if unitFraction != 0:
@@ -249,12 +250,16 @@ attendanceFile = args.attendance
 
 votingResultFile = args.voteresult
 
+# generate new attendance file and an empty vote result file
 if attendanceFile != None:
     updateFraction(attendanceFile)
 
+# calculate the total attendance fraction
 if args.outputfraction:
+    totalAttendanceRate(fraction)
     outputFractionOFEachVoter(fraction)
 
+# calculate the vote result 
 if votingResultFile != None:
     calculateFraction(votingResultFile)
 

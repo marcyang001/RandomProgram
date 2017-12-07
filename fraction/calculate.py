@@ -1,5 +1,6 @@
 import sys, json
-import pprint
+import pprint, argparse
+import convertToJSON
 
 fraction = {
     "101": 0.55, 
@@ -134,41 +135,75 @@ fraction = {
 }
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-a", "--attendance", help="file that keeps track of attendance",
+                    action="store")
+parser.add_argument("-v", "--voteresult", help="file that keeps track of the vote result",
+                    action="store")
+parser.add_argument("-g", "--generate", help="generate a new attendance sheet",
+                    action="store_true")
+parser.add_argument("-of", "--outputfraction", help="generate a new attendance sheet",
+                    action="store_true")
 
-if len(sys.argv) < 3:
-	
-	print("ERROR: no input file")
-	sys.exit()
-
-
-attendanceFile = sys.argv[1]
-
-votingResultFile = sys.argv[2]
+args = parser.parse_args()
 
 
 def updateFraction(inputFile):
+    print()
     with open (inputFile) as file:
-        json_data = json.load(file)
-        for ownerUnit, representative in json_data.items():
+        try:
+            attendanceSheet = json.load(file)
+        except json.decoder.JSONDecodeError:
+            print("ERROR: invalid json attendance result file")
+            sys.exit()
+
+        for ownerUnit, representative in attendanceSheet.items():
             if int(representative) != 0:
                 if str(ownerUnit) in fraction and str(representative) in fraction:
                     if str(ownerUnit) != str(representative):
-                        # update the fraction of the represetative 
-                        fraction[str(representative)] += fraction[str(ownerUnit)]
-                        # set the fraction of the absent owner to zero
-                        fraction[str(ownerUnit)] = 0
+                        # check if the representative itself is present
+                        if attendanceSheet[str(representative)] != 0:
+                            # update the fraction of the represetative 
+                            fraction[str(representative)] += fraction[str(ownerUnit)]
+                            # set the fraction of the absent owner to zero
+                            fraction[str(ownerUnit)] = 0
+                        else:
+                            print("ERROR: the representative # ", representative, " is absent. Check the attendance again")
+                            sys.exit()
                 else:
-                    print("either # ", ownerUnit, " or # ", representative, " is invalid")
-                    return
+                    print("ERROR: either # ", ownerUnit, " or # ", representative, " is invalid")
+                    sys.exit()
             else:
                 # forfeit owner
                 fraction[ownerUnit] = 0
 
+def totalAttendanceRate(fractionChart):
+    totalFraction = 0
+    for ownerUnit, unitFraction in fractionChart.items():
+        totalFraction += unitFraction
+
+    if totalFraction < 50:
+        print ("CAUTON: total fraction less than 50%, not enough to vote!")
+    return totalFraction
+
+def outputFractionOFEachVoter(fractionChart):
+
+    totalFraction = 0
+    print("\nVoting Right for each voter ")
+    print("=============================")
+    for ownerUnit, unitFraction in fractionChart.items():
+        if unitFraction != 0:
+            print(ownerUnit, " : ", unitFraction)
+
 
 def calculateFraction(inputFile):
-
+    print()
     with open (inputFile) as file:
-        json_data = json.load(file)
+        try:
+            json_data = json.load(file)
+        except json.decoder.JSONDecodeError:
+            print("ERROR: invalid json vote result file")
+            return
         electedCandiates = {}
         for voterUnit, candidates in json_data.items():
             #voter unit is valid
@@ -181,23 +216,46 @@ def calculateFraction(inputFile):
                         else:
                             electedCandiates[candidateUnit] = fraction[voterUnit]
                     else:
-                        print("the candidate unit # ", candidateUnit, " is not valid, voted by # ", voterUnit)
+                        print("ERROR: the candidate unit # ", candidateUnit, " is not valid, voted by # ", voterUnit)
                         return
             else:
-                print("the voter unit # ", voterUnit, " is not valid")
+                print("ERROR: the voter unit # ", voterUnit, " is not valid")
                 return
 
     file.close()
-    print ("\n\n Elected | Total Votes")
-    print("=======================================\n")
+    print ("\n\nElected | Total Votes")
+    print("===============================")
 
     for candidate, totalFraction in sorted(electedCandiates.items(), reverse=True, key=lambda k: (k[1],k[0])):
-        print (candidate, "    |    ", totalFraction)
+        if candidate < 1000:
+            print (candidate, "    |    ", totalFraction)
+        else:
+            print (candidate, "   |    ", totalFraction)
+
+    print()
+
+if args.generate:
+    convertToJSON.generateAttendance()
+    sys.exit()
+
+elif args.attendance == None and args.voteresult == None:
+    print("\nERROR: missing required file input: attend.json or voteresult.json")
+    sys.exit()
 
 
+attendanceFile = args.attendance
 
-updateFraction(attendanceFile)
-calculateFraction(votingResultFile)
+votingResultFile = args.voteresult
+
+if attendanceFile != None:
+    updateFraction(attendanceFile)
+    print("Info: total fraction vote: ", totalAttendanceRate(fraction))
+
+if args.outputfraction:
+    outputFractionOFEachVoter(fraction)
+
+if votingResultFile != None:
+    calculateFraction(votingResultFile)
 
 
 

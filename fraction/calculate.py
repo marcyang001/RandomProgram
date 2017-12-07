@@ -178,12 +178,14 @@ def updateFraction(inputFile):
                 fraction[ownerUnit] = 0
 
 def totalAttendanceRate(fractionChart):
+    print()
     totalFraction = 0
     for ownerUnit, unitFraction in fractionChart.items():
         totalFraction += unitFraction
 
     if totalFraction < 50:
         print ("CAUTON: total fraction less than 50%, not enough to vote!")
+    print("Info: total fraction vote: ", totalFraction)
     return totalFraction
 
 def outputFractionOFEachVoter(fractionChart):
@@ -249,7 +251,6 @@ votingResultFile = args.voteresult
 
 if attendanceFile != None:
     updateFraction(attendanceFile)
-    print("Info: total fraction vote: ", totalAttendanceRate(fraction))
 
 if args.outputfraction:
     outputFractionOFEachVoter(fraction)
